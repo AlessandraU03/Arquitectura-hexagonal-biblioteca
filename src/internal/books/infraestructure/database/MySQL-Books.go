@@ -7,20 +7,22 @@ import (
 	"log"
 )
 
-type MySQL struct {
+type MySQLBooks struct {
 	conn *core.Conn_MySQL
 }
 
-func NewMySQL() *MySQL {
+func NewMySQLBooks() *MySQLBooks {
 	conn := core.GetDBPool()
 	if conn.Err != "" {
 		log.Fatalf("Error al configurar el pool de conexiones: %v", conn.Err)
 	}
 
-	return &MySQL{conn: conn}
+	return &MySQLBooks{conn: conn}
 }
 
-func (mysql *MySQL) Save(Book *entities.Book) error {
+
+
+func (mysql *MySQLBooks) Save(Book *entities.Book) error {
     query := "INSERT INTO books (name, autor, categoria) VALUES (?, ?, ?)" // Añadimos categoria aquí
     result, err := mysql.conn.ExecutePreparedQuery(query, Book.Name, Book.Autor, Book.Categoria)
     if err != nil {
@@ -35,7 +37,7 @@ func (mysql *MySQL) Save(Book *entities.Book) error {
 
 // GetAll - Obtiene todos los Bookos
 // GetAll - Obtiene todos los Bookos
-func (mysql *MySQL) GetAll() ([]*entities.Book, error) {
+func (mysql *MySQLBooks) GetAll() ([]*entities.Book, error) {
     query := "SELECT id, name, autor, categoria FROM books" // Añadimos categoria aquí
     rows := mysql.conn.FetchRows(query)
     defer rows.Close()
@@ -57,7 +59,7 @@ func (mysql *MySQL) GetAll() ([]*entities.Book, error) {
 }
 
 // GetByID - Obtiene un Booko por ID
-func (mysql *MySQL) GetByID(id int32) (*entities.Book, error) {
+func (mysql *MySQLBooks) GetByID(id int32) (*entities.Book, error) {
     query := "SELECT id, name, autor, categoria FROM books WHERE id = ?"
     rows := mysql.conn.FetchRows(query, id)
     defer rows.Close()
@@ -75,7 +77,7 @@ func (mysql *MySQL) GetByID(id int32) (*entities.Book, error) {
 
 
 // Update - Actualiza un Booko
-func (mysql *MySQL) Update(Book *entities.Book) error {
+func (mysql *MySQLBooks) Update(Book *entities.Book) error {
 	query := "UPDATE books SET name = ?, autor = ?, categoria = ? WHERE id = ?"
 	_, err := mysql.conn.ExecutePreparedQuery(query, Book.Name, Book.Autor, Book.Categoria, Book.ID)
 	if err != nil {
@@ -85,7 +87,7 @@ func (mysql *MySQL) Update(Book *entities.Book) error {
 }
 
 // Delete - Elimina un Booko
-func (mysql *MySQL) Delete(id int32) error {
+func (mysql *MySQLBooks) Delete(id int32) error {
     query := "DELETE FROM books WHERE id = ?"
     _, err := mysql.conn.ExecutePreparedQuery(query, id)
     if err != nil {
