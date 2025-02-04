@@ -16,7 +16,6 @@ func NewDeleteComicController(useCase application.DeleteComic) *DeleteComicContr
 }
 
 func (c *DeleteComicController) Handle(ctx *gin.Context) {
-	// Obtener el ID del libro desde la URL
 	id := ctx.Param("id")
 	idInt32, err := strconv.Atoi(id)
 	if err != nil {

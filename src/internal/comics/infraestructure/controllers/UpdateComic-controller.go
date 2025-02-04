@@ -20,7 +20,7 @@ func (c *UpdateComicController) Handle(ctx *gin.Context) {
 	var updatedComic struct {
 		Name      string `json:"name"`
 		Autor     string `json:"autor"`
-		Categoria string `json:"categoria"`
+		Editorial string `json:"editorial"`
 	}
 
 	// Validar los datos enviados en el cuerpo de la solicitud
@@ -38,7 +38,7 @@ func (c *UpdateComicController) Handle(ctx *gin.Context) {
 	}
 
 	// Crear el libro con los datos actualizados
-	Comic := entities.NewComic(updatedComic.Name, updatedComic.Autor, updatedComic.Categoria)
+	Comic := entities.NewComic(updatedComic.Name, updatedComic.Autor, updatedComic.Editorial)
 	Comic.Id = int32(idInt32)
 
 	// Ejecutar el caso de uso para actualizar el libro
@@ -48,13 +48,6 @@ func (c *UpdateComicController) Handle(ctx *gin.Context) {
 	}
 
 	// Responder con los datos del libro actualizado
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Comic updated",
-		"Comic": gin.H{
-			"id":        Comic.Id,
-			"name":      Comic.Name,
-			"autor":     Comic.Autor,
-			"editorial": Comic.Editorial,
-		},
-	})
+	ctx.JSON(http.StatusOK, Comic)
+			
 }

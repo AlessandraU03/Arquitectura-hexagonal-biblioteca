@@ -58,22 +58,7 @@ func (mysql *MySQLBooks) GetAll() ([]*entities.Book, error) {
     return Books, nil
 }
 
-// GetByID - Obtiene un Booko por ID
-func (mysql *MySQLBooks) GetByID(id int32) (*entities.Book, error) {
-    query := "SELECT id, name, autor, categoria FROM books WHERE id = ?"
-    rows := mysql.conn.FetchRows(query, id)
-    defer rows.Close()
 
-    if rows.Next() {
-        Book := &entities.Book{}
-        if err := rows.Scan(&Book.ID, &Book.Name, &Book.Autor, &Book.Categoria); err != nil {
-            return nil, fmt.Errorf("error al escanear el Booko: %w", err)
-        }
-        return Book, nil
-    }
-
-    return nil, fmt.Errorf("Book con ID %d no encontrado", id)
-}
 
 
 // Update - Actualiza un Booko

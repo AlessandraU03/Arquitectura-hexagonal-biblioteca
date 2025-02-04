@@ -23,7 +23,7 @@ func NewMySQLComics() *MySQLComics {
 
 
 func (mysql *MySQLComics) Save(Comic *entities.Comic) error {
-    query := "INSERT INTO Comics (name, autor, Editorial) VALUES (?, ?, ?)" // Añadimos Editorial aquí
+    query := "INSERT INTO Comics (name, autor, Editorial) VALUES (?, ?, ?)" 
     result, err := mysql.conn.ExecutePreparedQuery(query, Comic.Name, Comic.Autor, Comic.Editorial)
     if err != nil {
         return fmt.Errorf("error al guardar el libro: %w", err)
@@ -35,10 +35,8 @@ func (mysql *MySQLComics) Save(Comic *entities.Comic) error {
 }
 
 
-// GetAll - Obtiene todos los Comicos
-// GetAll - Obtiene todos los Comicos
 func (mysql *MySQLComics) GetAll() ([]*entities.Comic, error) {
-    query := "SELECT id, name, autor, editorial FROM Comics" // Añadimos Editorial aquí
+    query := "SELECT id, name, autor, editorial FROM Comics"
     rows := mysql.conn.FetchRows(query)
     defer rows.Close()
 
@@ -58,22 +56,6 @@ func (mysql *MySQLComics) GetAll() ([]*entities.Comic, error) {
     return Comics, nil
 }
 
-// GetByID - Obtiene un Comico por ID
-func (mysql *MySQLComics) GetByID(id int32) (*entities.Comic, error) {
-    query := "SELECT id, name, autor, Editorial FROM Comics WHERE id = ?"
-    rows := mysql.conn.FetchRows(query, id)
-    defer rows.Close()
-
-    if rows.Next() {
-        Comic := &entities.Comic{}
-        if err := rows.Scan(&Comic.Id, &Comic.Name, &Comic.Autor, &Comic.Editorial); err != nil {
-            return nil, fmt.Errorf("error al escanear el Comico: %w", err)
-        }
-        return Comic, nil
-    }
-
-    return nil, fmt.Errorf("Comic con ID %d no encontrado", id)
-}
 
 
 // Update - Actualiza un Comico

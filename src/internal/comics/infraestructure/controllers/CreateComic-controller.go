@@ -22,7 +22,6 @@ func (c *CreateComicController) Handle(ctx *gin.Context) {
 		Editorial string `json:"editorial"`
 	}
 
-	// Validar los datos enviados en el cuerpo de la solicitud
 	if err := ctx.ShouldBindJSON(&newComic); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
