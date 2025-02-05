@@ -2,7 +2,6 @@ package application
 
 import (
 	"demo/src/internal/comics/domain"
-	"demo/src/internal/comics/domain/entities"
 )
 
 type CreateComic struct {
@@ -13,6 +12,6 @@ func NewCreateComic(db domain.IComic) *CreateComic{
 	return &CreateComic{db: db}
 }
 
-func (cp *CreateComic) Execute(comic *entities.Comic) error{
-	return cp.db.Save(comic)
+func (cp *CreateComic) Execute(name string, autor string, editorial string){
+	cp.db.Save(name, autor, editorial)	
 }

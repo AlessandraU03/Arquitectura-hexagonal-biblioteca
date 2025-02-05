@@ -2,20 +2,23 @@ package routes
 
 import (
 	"demo/src/internal/comics/application"
+	"demo/src/internal/comics/infraestructure/database"
 	"demo/src/internal/comics/infraestructure/controllers"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterComicRoutes(router *gin.Engine, createComicUseCase *application.CreateComic, listComicsUseCase *application.ListComics, updateComicUseCase *application.UpdateComic, deleteComicUseCase *application.DeleteComic) {
+
+func RegisterComicRoutes(router *gin.Engine) {
+	dbComics := database.NewMySQLComics()
 	// Crear instancias de los controladores
-	createComicController := controllers.NewCreateComicController(*createComicUseCase)
-	listComicsController := controllers.NewListComicsController(*listComicsUseCase)
-	updateComicController := controllers.NewUpdateComicController(*updateComicUseCase)
-	deleteComicController := controllers.NewDeleteComicController(*deleteComicUseCase)
+	createComicController := controllers.NewCreateComicController(*application.NewCreateComic(dbComics))
+	listComicsController := controllers.NewListComicsController(*application.NewListComics(dbComics))
+	updateComicController := controllers.NewUpdateComicController(*application.NewUpdateComic(dbComics))
+	deleteComicController := controllers.NewDeleteComicController(*application.NewDeleteComic(dbComics))
 
 	// Registrar las rutas
-	router.POST("/comic", createComicController.Handle)
-	router.GET("/comic", listComicsController.Handle)
-	router.PUT("/comic/:id", updateComicController.Handle)
-	router.DELETE("/comic/:id", deleteComicController.Handle)
+	router.POST("/comic", createComicController.Execute)
+	router.GET("/comic", listComicsController.Execute)
+	router.PUT("/comic/:id", updateComicController.Execute)
+	router.DELETE("/comic/:id", deleteComicController.Execute)
 }

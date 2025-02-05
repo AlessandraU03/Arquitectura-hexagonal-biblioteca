@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"demo/src/internal/comics/application"
-	"demo/src/internal/comics/domain/entities"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -16,7 +15,7 @@ func NewUpdateComicController(useCase application.UpdateComic) *UpdateComicContr
 	return &UpdateComicController{useCase: useCase}
 }
 
-func (c *UpdateComicController) Handle(ctx *gin.Context) {
+func (c *UpdateComicController) Execute(g *gin.Context) {
 	var updatedComic struct {
 		Name      string `json:"name"`
 		Autor     string `json:"autor"`
@@ -24,30 +23,29 @@ func (c *UpdateComicController) Handle(ctx *gin.Context) {
 	}
 
 	// Validar los datos enviados en el cuerpo de la solicitud
-	if err := ctx.ShouldBindJSON(&updatedComic); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+	if err := g.ShouldBindJSON(&updatedComic); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
 	// Obtener el ID del libro desde la URL
-	id := ctx.Param("id")
-	idInt32, err := strconv.Atoi(id)
+	idStr := g.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
-	// Crear el libro con los datos actualizados
-	Comic := entities.NewComic(updatedComic.Name, updatedComic.Autor, updatedComic.Editorial)
-	Comic.Id = int32(idInt32)
+	c.useCase.Execute(int32(id), updatedComic.Name, updatedComic.Autor, updatedComic.Editorial)
 
-	// Ejecutar el caso de uso para actualizar el libro
-	if err := c.useCase.Execute(Comic); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update Comic"})
-		return
-	}
-
-	// Responder con los datos del libro actualizado
-	ctx.JSON(http.StatusOK, Comic)
+	g.JSON(http.StatusOK, gin.H{
+		"message": "Comic actualizado con exito",
+		"book": gin.H{
+			"id":        id,
+			"name":      updatedComic.Name,
+			"autor":     updatedComic.Autor,
+			"categoria": updatedComic.Editorial,
+		},
+	})
 			
 }

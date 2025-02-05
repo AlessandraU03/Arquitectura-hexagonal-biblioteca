@@ -2,7 +2,6 @@ package database
 
 import (
 	"demo/src/core"
-	"demo/src/internal/comics/domain/entities"
 	"fmt"
 	"log"
 )
@@ -16,17 +15,14 @@ func NewMySQLComics() *MySQLComics {
 	if conn.Err != "" {
 		log.Fatalf("Error al configurar el pool de conexiones: %v", conn.Err)
 	}
-
 	return &MySQLComics{conn: conn}
 }
 
-
-
-func (mysql *MySQLComics) Save(Comic *entities.Comic) error {
-    query := "INSERT INTO Comics (name, autor, Editorial) VALUES (?, ?, ?)" 
-    result, err := mysql.conn.ExecutePreparedQuery(query, Comic.Name, Comic.Autor, Comic.Editorial)
+func (mysql *MySQLComics) Save(name string, autor string, editorial string) error {
+    query := "INSERT INTO Comics (name, autor, editorial) VALUES (?, ?, ?)"
+    result, err := mysql.conn.ExecutePreparedQuery(query, name, autor, editorial)
     if err != nil {
-        return fmt.Errorf("error al guardar el libro: %w", err)
+        return fmt.Errorf("error al guardar el cómic: %w", err)
     }
 
     rowsAffected, _ := result.RowsAffected()
@@ -34,46 +30,48 @@ func (mysql *MySQLComics) Save(Comic *entities.Comic) error {
     return nil
 }
 
-
-func (mysql *MySQLComics) GetAll() ([]*entities.Comic, error) {
+func (mysql *MySQLComics) GetAll() ([]map[string]interface{}, error) {
     query := "SELECT id, name, autor, editorial FROM Comics"
     rows := mysql.conn.FetchRows(query)
     defer rows.Close()
 
-    var Comics []*entities.Comic
+    var comics []map[string]interface{}
     for rows.Next() {
-        Comic := &entities.Comic{}
-        if err := rows.Scan(&Comic.Id, &Comic.Name, &Comic.Autor, &Comic.Editorial); err != nil {
-            return nil, fmt.Errorf("error al escanear el libro: %w", err)
+        var id int32
+        var name, autor, editorial string
+        if err := rows.Scan(&id, &name, &autor, &editorial); err != nil {
+            return nil, fmt.Errorf("error al escanear el cómic: %w", err)
         }
-        Comics = append(Comics, Comic)
+        comic := map[string]interface{}{
+            "id":       id,
+            "name":     name,
+            "autor":    autor,
+            "editorial": editorial,
+        }
+        comics = append(comics, comic)
     }
 
     if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("error iterando sobre los Comicos: %w", err)
+        return nil, fmt.Errorf("error iterando sobre los cómics: %w", err)
     }
 
-    return Comics, nil
+    return comics, nil
 }
 
-
-
-// Update - Actualiza un Comico
-func (mysql *MySQLComics) Update(Comic *entities.Comic) error {
-	query := "UPDATE Comics SET name = ?, autor = ?, Editorial = ? WHERE id = ?"
-	_, err := mysql.conn.ExecutePreparedQuery(query, Comic.Name, Comic.Autor, Comic.Editorial, Comic.Id)
+func (mysql *MySQLComics) Update(id int32, name string, autor string, editorial string) error {
+	query := "UPDATE Comics SET name = ?, autor = ?, editorial = ? WHERE id = ?"
+	_, err := mysql.conn.ExecutePreparedQuery(query, name, autor, editorial, id)
 	if err != nil {
-		return fmt.Errorf("error al actualizar el Comico: %w", err)
+		return fmt.Errorf("error al actualizar el cómic: %w", err)
 	}
 	return nil
 }
 
-// Delete - Elimina un Comico
 func (mysql *MySQLComics) Delete(id int32) error {
     query := "DELETE FROM Comics WHERE id = ?"
     _, err := mysql.conn.ExecutePreparedQuery(query, id)
     if err != nil {
-        return fmt.Errorf("error al eliminar el Comico: %w", err)
+        return fmt.Errorf("error al eliminar el cómic: %w", err)
     }
     return nil
 }

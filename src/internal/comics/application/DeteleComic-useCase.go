@@ -12,6 +12,6 @@ func NewDeleteComic(db domain.IComic) *DeleteComic{
 	return &DeleteComic{db: db}
 }
 
-func (cp *DeleteComic) Execute(id int32) error{
-	return cp.db.Delete(id)
+func (cp *DeleteComic) Execute(id int32){
+	 cp.db.Delete(id)
 }

@@ -2,7 +2,6 @@ package application
 
 import (
 	"demo/src/internal/books/domain"
-	"demo/src/internal/books/domain/entities"
 )
 
 type ListBooks struct {
@@ -13,6 +12,6 @@ func NewListBook(db domain.IBook) *ListBooks {
 	return &ListBooks{db: db}
 }
 
-func (lp *ListBooks) Execute() ([]*entities.Book, error){
+func (lp *ListBooks) Execute() ([]map[string]interface{}, error){
 	return lp.db.GetAll()
 }

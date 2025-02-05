@@ -2,7 +2,6 @@ package application
 
 import (
 	"demo/src/internal/comics/domain"
-	"demo/src/internal/comics/domain/entities"
 )
 
 type ListComics struct {
@@ -13,7 +12,7 @@ func NewListComics(db domain.IComic) *ListComics{
 	return &ListComics{db: db}
 }
 
-func (lc *ListComics) Execute() ([]*entities.Comic, error){
+func (lc *ListComics) Execute() ([]map[string]interface{}, error){
 	return lc.db.GetAll()
 }
 

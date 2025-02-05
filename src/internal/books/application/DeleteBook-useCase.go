@@ -10,6 +10,6 @@ func NewDeleteBook(db domain.IBook) *DeleteBook {
     return &DeleteBook{db: db}
 }
 
-func (dp *DeleteBook) Execute(id int32) error {
-    return dp.db.Delete(id)
+func (dp *DeleteBook) Execute(id int32) {
+    dp.db.Delete(id)
 }

@@ -2,7 +2,6 @@ package database
 
 import (
 	"demo/src/core"
-	"demo/src/internal/books/domain/entities"
 	"fmt"
 	"log"
 )
@@ -16,67 +15,62 @@ func NewMySQLBooks() *MySQLBooks {
 	if conn.Err != "" {
 		log.Fatalf("Error al configurar el pool de conexiones: %v", conn.Err)
 	}
-
 	return &MySQLBooks{conn: conn}
 }
 
-
-
-func (mysql *MySQLBooks) Save(Book *entities.Book) error {
-    query := "INSERT INTO books (name, autor, categoria) VALUES (?, ?, ?)" // Añadimos categoria aquí
-    result, err := mysql.conn.ExecutePreparedQuery(query, Book.Name, Book.Autor, Book.Categoria)
-    if err != nil {
-        return fmt.Errorf("error al guardar el libro: %w", err)
-    }
-
-    rowsAffected, _ := result.RowsAffected()
-    log.Printf("[MySQL] - Filas afectadas: %d", rowsAffected)
-    return nil
-}
-
-
-// GetAll - Obtiene todos los Bookos
-// GetAll - Obtiene todos los Bookos
-func (mysql *MySQLBooks) GetAll() ([]*entities.Book, error) {
-    query := "SELECT id, name, autor, categoria FROM books" // Añadimos categoria aquí
-    rows := mysql.conn.FetchRows(query)
-    defer rows.Close()
-
-    var Books []*entities.Book
-    for rows.Next() {
-        Book := &entities.Book{}
-        if err := rows.Scan(&Book.ID, &Book.Name, &Book.Autor, &Book.Categoria); err != nil {
-            return nil, fmt.Errorf("error al escanear el libro: %w", err)
-        }
-        Books = append(Books, Book)
-    }
-
-    if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("error iterando sobre los Bookos: %w", err)
-    }
-
-    return Books, nil
-}
-
-
-
-
-// Update - Actualiza un Booko
-func (mysql *MySQLBooks) Update(Book *entities.Book) error {
-	query := "UPDATE books SET name = ?, autor = ?, categoria = ? WHERE id = ?"
-	_, err := mysql.conn.ExecutePreparedQuery(query, Book.Name, Book.Autor, Book.Categoria, Book.ID)
+func (mysql *MySQLBooks) Save(name string, autor string, categoria string) error {
+	query := "INSERT INTO books (name, autor, categoria) VALUES (?, ?, ?)"
+	result, err := mysql.conn.ExecutePreparedQuery(query, name, autor, categoria)
 	if err != nil {
-		return fmt.Errorf("error al actualizar el Booko: %w", err)
+		return fmt.Errorf("error al guardar el libro: %w", err)
+	}
+	rowsAffected, _ := result.RowsAffected()
+	log.Printf("[MySQL] - Filas afectadas: %d", rowsAffected)
+	return nil
+}
+
+func (mysql *MySQLBooks) GetAll() ([]map[string]interface{}, error) {
+	query := "SELECT id, name, autor, categoria FROM books"
+	rows := mysql.conn.FetchRows(query)
+	defer rows.Close()
+
+	var books []map[string]interface{}
+	for rows.Next() {
+		var id int32
+		var name, autor, categoria string
+		if err := rows.Scan(&id, &name, &autor, &categoria); err != nil {
+			return nil, fmt.Errorf("error al escanear el libro: %w", err)
+		}
+		book := map[string]interface{}{
+			"id":       id,
+			"name":     name,
+			"autor":    autor,
+			"categoria": categoria,
+		}
+		books = append(books, book)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterando sobre los libros: %w", err)
+	}
+
+	return books, nil
+}
+
+func (mysql *MySQLBooks) Update(id int32, name string, autor string, categoria string) error {
+	query := "UPDATE books SET name = ?, autor = ?, categoria = ? WHERE id = ?"
+	_, err := mysql.conn.ExecutePreparedQuery(query, name, autor, categoria, id)
+	if err != nil {
+		return fmt.Errorf("error al actualizar el libro: %w", err)
 	}
 	return nil
 }
 
-// Delete - Elimina un Booko
 func (mysql *MySQLBooks) Delete(id int32) error {
-    query := "DELETE FROM books WHERE id = ?"
-    _, err := mysql.conn.ExecutePreparedQuery(query, id)
-    if err != nil {
-        return fmt.Errorf("error al eliminar el Booko: %w", err)
-    }
-    return nil
+	query := "DELETE FROM books WHERE id = ?"
+	_, err := mysql.conn.ExecutePreparedQuery(query, id)
+	if err != nil {
+		return fmt.Errorf("error al eliminar el libro: %w", err)
+	}
+	return nil
 }

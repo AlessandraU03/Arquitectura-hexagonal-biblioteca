@@ -1,10 +1,8 @@
 package domain
 
-import "demo/src/internal/books/domain/entities"
-
 type IBook interface {
-	Save(Book *entities.Book) error
-	GetAll() ([]*entities.Book, error)
-	Update(Book *entities.Book) error
+	Save(name string, autor string, categoria string) error
+	GetAll() ([]map[string]interface{}, error)
+	Update(id int32, name string, autor string, categoria string) error
 	Delete(id int32) error
 }

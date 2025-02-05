@@ -15,22 +15,18 @@ func NewDeleteComicController(useCase application.DeleteComic) *DeleteComicContr
 	return &DeleteComicController{useCase: useCase}
 }
 
-func (c *DeleteComicController) Handle(ctx *gin.Context) {
-	id := ctx.Param("id")
-	idInt32, err := strconv.Atoi(id)
+func (c *DeleteComicController) Execute(g *gin.Context) {
+	idStr := g.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
-	// Ejecutar el caso de uso para eliminar el libro
-	if err := c.useCase.Execute(int32(idInt32)); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete Comic"})
-		return
-	}
+	c.useCase.Execute(int32(id))
 
 	// Responder con un mensaje de éxito
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Comic deleted",
+	g.JSON(http.StatusOK, gin.H{
+		"message": "Comic eliminado con exito",
 	})
 }

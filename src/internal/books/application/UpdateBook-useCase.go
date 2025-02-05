@@ -2,7 +2,6 @@ package application
 
 import (
 	"demo/src/internal/books/domain"
-	"demo/src/internal/books/domain/entities"
 )
 
 type UpdateBook struct {
@@ -13,6 +12,6 @@ func NewUpdateBook(db domain.IBook) *UpdateBook {
 	return &UpdateBook{db: db}
 }
 
-func (up *UpdateBook) Execute(book *entities.Book) error {
-	return up.db.Update(book)
+func (up *UpdateBook) Execute(id int32, name string, autor string, categoria string) {
+	up.db.Update(id, name, autor, categoria)
 }

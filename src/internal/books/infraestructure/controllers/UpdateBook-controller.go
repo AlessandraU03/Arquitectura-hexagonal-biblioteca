@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"demo/src/internal/books/application"
-	"demo/src/internal/books/domain/entities"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -16,7 +15,7 @@ func NewUpdateBookController(useCase application.UpdateBook) *UpdateBookControll
 	return &UpdateBookController{useCase: useCase}
 }
 
-func (c *UpdateBookController) Handle(ctx *gin.Context) {
+func (c *UpdateBookController) Execute(g *gin.Context) {
 	var updatedBook struct {
 		Name      string `json:"name"`
 		Autor     string `json:"autor"`
@@ -24,37 +23,28 @@ func (c *UpdateBookController) Handle(ctx *gin.Context) {
 	}
 
 	// Validar los datos enviados en el cuerpo de la solicitud
-	if err := ctx.ShouldBindJSON(&updatedBook); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+	if err := g.ShouldBindJSON(&updatedBook); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
 	// Obtener el ID del libro desde la URL
-	id := ctx.Param("id")
-	idInt32, err := strconv.Atoi(id)
+	idStr := g.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
-
-	// Crear el libro con los datos actualizados
-	book := entities.NewBook(updatedBook.Name, updatedBook.Autor, updatedBook.Categoria)
-	book.ID = int32(idInt32)
 
 	// Ejecutar el caso de uso para actualizar el libro
-	if err := c.useCase.Execute(book); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update book"})
-		return
-	}
+	c.useCase.Execute(int32(id), updatedBook.Name, updatedBook.Autor, updatedBook.Categoria)
 
 	// Responder con los datos del libro actualizado
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Book updated",
-		"book": gin.H{
-			"id":        book.ID,
-			"name":      book.Name,
-			"autor":     book.Autor,
-			"categoria": book.Categoria,
-		},
+	g.JSON(http.StatusOK, gin.H{
+			"message": "Libro actualizado con exito",
+			"id":        id,
+			"name":      updatedBook.Name,
+			"autor":     updatedBook.Autor,
+			"categoria": updatedBook.Categoria,
 	})
 }

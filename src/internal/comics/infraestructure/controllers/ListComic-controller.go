@@ -14,12 +14,12 @@ func NewListComicsController(useCase application.ListComics) *ListComicsControll
 	return &ListComicsController{useCase: useCase}
 }
 
-func (c *ListComicsController) Handle(ctx *gin.Context) {
-	ComiListComics, err := c.useCase.Execute()
+func (c *ListComicsController) Execute(g *gin.Context) {
+	comics, err := c.useCase.Execute()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve ComiListComics"})
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve ComiListComics"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, ComiListComics)
+	g.JSON(http.StatusOK, comics)
 }

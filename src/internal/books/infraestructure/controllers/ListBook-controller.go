@@ -14,12 +14,12 @@ func NewListBooksController(useCase application.ListBooks) *ListBooksController 
 	return &ListBooksController{useCase: useCase}
 }
 
-func (c *ListBooksController) Handle(ctx *gin.Context) {
+func (c *ListBooksController) Execute(g *gin.Context) {
 	books, err := c.useCase.Execute()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve books"})
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve books"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, books)
+	g.JSON(http.StatusOK, books)
 }
