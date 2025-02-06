@@ -75,3 +75,29 @@ func (mysql *MySQLComics) Delete(id int32) error {
     }
     return nil
 }
+
+func (mysql *MySQLComics) GetById(id int32) (map[string]interface{}, error) {
+    query := "SELECT id, name, autor, editorial FROM Comics WHERE id = ?"
+    rows := mysql.conn.FetchRows(query, id)
+    defer rows.Close()
+
+    if !rows.Next() {
+        return nil, fmt.Errorf("libro no encontrado con id: %d", id)
+    }
+
+    var idFound int32
+    var name, autor, editorial string
+
+    if err := rows.Scan(&idFound, &name, &autor, &editorial); err != nil {
+        return nil, fmt.Errorf("error al escanear el libro: %w", err)
+    }
+
+    book := map[string]interface{}{
+        "id":        idFound,
+        "name":      name,
+        "autor":     autor,
+        "editorial": editorial,
+    }
+
+    return book, nil
+}
